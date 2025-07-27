@@ -1,0 +1,458 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentación Didáctica: Estrategias Metodológicas y Evaluativas</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; }
+        .page { display: none; min-height: 100vh; padding: 2rem; }
+        .page.active { display: block; }
+        .intro-message { display: none; min-height: 100vh; padding: 2rem; text-align: center; }
+        .intro-message.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .question-container { margin-bottom: 1rem; }
+        .error { color: red; display: none; }
+        .answer-section { display: none; }
+        .bg-blue-900 { background-color: #003087; }
+        .bg-gray-100 { background-color: #F3F4F6; }
+        .bg-yellow-500 { background-color: #FFB107; }
+        .bg-yellow-400 { background-color: #F59E0B; }
+        .bg-blue-800 { background-color: #00235B; }
+        .bg-blue-600 { background-color: #1D4ED8; }
+        .bg-white { background-color: #FFFFFF; }
+        .text-white { color: #FFFFFF; }
+        .text-blue-900 { color: #003087; }
+        .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .font-bold { font-weight: 700; }
+        .p-8 { padding: 2rem; }
+        .p-2 { padding: 0.5rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mt-8 { margin-top: 2rem; }
+        .mt-6 { margin-top: 1.5rem; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-end { justify-content: flex-end; }
+        .rounded { border-radius: 0.25rem; }
+        .border { border-width: 1px; border-color: #D1D5DB; }
+        .w-full { width: 100%; }
+        .pl-6 { padding-left: 1.5rem; }
+        .list-decimal { list-style-type: decimal; }
+        .list-disc { list-style-type: disc; }
+        .hover\:bg-yellow-400:hover { background-color: #F59E0B; }
+        .hover\:bg-blue-800:hover { background-color: #00235B; }
+        .hover\:bg-blue-600:hover { background-color: #1D4ED8; }
+        .hover\:bg-gray-200:hover { background-color: #E5E7EB; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Mensaje inicial (reemplaza la antigua página 0) -->
+    <div id="intro-message" class="intro-message bg-white text-blue-900">
+        <div class="text-center p-8">
+            <h1 class="text-4xl font-bold mb-4">Universidad del Alba</h1>
+            <p class="text-xl mb-2">Estudiante Magíster en Educación</p>
+            <p class="text-xl mb-2">Nombre: Pablo Robledo T.</p>
+            <p class="text-xl mb-2">Estrategias Metodológicas y Evaluativas para el Aprendizaje Activo</p>
+            <p class="text-xl mb-4">Profesora: María Gabriela Enriqueta Damiani</p>
+            <button onclick="startPresentation()" class="bg-white text-blue-900 px-6 py-2 rounded border hover:bg-gray-200">Comenzar</button>
+        </div>
+    </div>
+
+    <!-- Página 1: Introducción -->
+    <div id="page1" class="page">
+        <h2 class="text-3xl font-bold mb-4 text-blue-900">Introducción</h2>
+        <p class="text-lg mb-4">
+            Esta presentación aborda las estrategias metodológicas y evaluativas para el aprendizaje activo, en el contexto de la Unidad 4 del curso de la Universidad del Alba. En un mundo educativo transformado por avances tecnológicos y sociales, la educación superior debe adaptarse para responder a las necesidades de estudiantes diversos, especialmente en contextos chilenos como zonas mineras, rurales o industriales. La retroalimentación se posiciona como un pilar clave para identificar logros y áreas de mejora, promoviendo aprendizajes significativos y autónomos. Esta presentación explora cómo diseñar procesos de enseñanza-aprendizaje efectivos a través de la programación didáctica, estrategias metodológicas activas, y una evaluación integral que combine retroalimentación constante y herramientas contextualizadas (Blanco Felip, 2016).
+        </p>
+        <p class="text-lg mb-4">
+            Las preguntas motivadoras que guían esta unidad son: <strong>¿Cómo realizar retroalimentaciones efectivas y qué elementos priorizar?</strong> y <strong>¿Cómo mejorar las prácticas docentes con la retroalimentación estudiantil?</strong> En entornos virtuales y presenciales, estas preguntas nos invitan a reflexionar sobre cómo la evaluación y la retroalimentación pueden transformar la experiencia educativa, fomentando un aprendizaje profundo y relevante para un mundo volátil y complejo (Fullan et al., 2017).
+        </p>
+        <div class="flex justify-end">
+            <button onclick="navigateTo('page2')" class="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800">Siguiente</button>
+        </div>
+    </div>
+
+    <!-- Página 2: Programación Didáctica -->
+    <div id="page2" class="page">
+        <h2 class="text-3xl font-bold mb-4 text-blue-900">Programación Didáctica</h2>
+        <p class="text-lg mb-4">
+            La programación didáctica es el proceso estratégico de planificación y desarrollo del proceso de enseñanza-aprendizaje, respondiendo a preguntas clave: ¿qué enseñar?, ¿cuándo enseñar?, ¿cómo enseñar?, y ¿cómo evaluar? (Biggs, 2003). Implica alinear objetivos, contenidos, metodologías, recursos, y evaluaciones para garantizar aprendizajes significativos. En educación superior, debe ser innovadora, considerando la diversidad de estudiantes (estilos de aprendizaje, contextos socioeconómicos) y entornos (acceso a TIC, contextos industriales como la minería en Chile).
+        </p>
+        <p class="text-lg mb-4">
+            <strong>Componentes de la programación didáctica</strong>:
+            <ul class="list-disc pl-6">
+                <li><strong>Qué enseñar</strong>: Intenciones educativas, centradas en competencias clave (iniciativa, manejo de información, resolución de problemas).</li>
+                <li><strong>Cuándo enseñar</strong>: Plan de acción con temporalización de actividades.</li>
+                <li><strong>Cómo enseñar</strong>: Metodologías activas (ABP, proyectos, debates), participativas (mesa redonda, torbellino de ideas), y manipulativas (simulaciones, TIC).</li>
+                <li><strong>Qué, cómo, cuándo evaluar</strong>: Evaluaciones iniciales, de proceso, finales, y posteriores, con retroalimentación constante.</li>
+            </ul>
+        </p>
+        <p class="text-lg mb-4">
+            La incorporación de competencias clave y estándares de aprendizaje evaluables transforma la cultura escolar, promoviendo métodos que potencien el desarrollo competencial. Como señala Scott Willis, enseñar de manera uniforme resulta ineficaz: un tercio de los estudiantes ya sabe, un tercio aprende, y un tercio no lo hace, lo que implica que dos tercios pierden su tiempo. Por ello, la programación didáctica debe ser diferenciada, adaptándose a las necesidades individuales y contextuales (Ministerio de Educación de Chile, 2020).
+        </p>
+        <div class="flex justify-between">
+            <button onclick="navigateTo('page1')" class="bg-white text-blue-900 px-4 py-2 rounded border hover:bg-gray-200">Volver</button>
+            <button onclick="navigateTo('page3')" class="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800">Siguiente</button>
+        </div>
+    </div>
+
+    <!-- Página 3: Estrategias Metodológicas -->
+    <div id="page3" class="page">
+        <h2 class="text-3xl font-bold mb-4 text-blue-900">Estrategias Metodológicas</h2>
+        <p class="text-lg mb-4">
+            Las estrategias metodológicas son procesos y técnicas que facilitan aprendizajes significativos, promoviendo el desarrollo de competencias como la resolución de problemas, el pensamiento crítico, y el aprendizaje autónomo (Benito & Cruz, 2005). Estas se dividen en estrategias de enseñanza, aprendizaje, y didácticas, organizadas en tres momentos clave: inicio (preactiva), desarrollo (interactiva), y cierre (postactiva), asegurando fluidez y continuidad (García, 2011).
+        </p>
+        <p class="text-lg mb-4">
+            <strong>Estrategias de enseñanza</strong>: Incluyen preguntas insertadas, organizadores previos, mapas conceptuales, debates, y metáforas. Ejemplo: En un curso de logística, un docente podría usar un mapa conceptual para relacionar conceptos de inventarios con procesos reales en SAP.
+        </p>
+        <p class="text-lg mb-4">
+            <strong>Estrategias de aprendizaje</strong>: Fomentan el "aprender a aprender" mediante herramientas como esquemas, resúmenes, y mapas mentales. El objetivo es enseñar a pensar, promoviendo metacognición y autorregulación (Doran, 1981).
+        </p>
+        <p class="text-lg mb-4">
+            <strong>Estrategias didácticas</strong>:
+            <ul class="list-disc pl-6">
+                <li><strong>Aprendizaje Basado en Problemas (ABP)</strong>: Trabajo en grupos de 5-8, centrado en resolver problemas reales, fomenta pensamiento crítico y aprendizaje autónomo.</li>
+                <li><strong>Preguntas guía</strong>: Abordan qué, para qué, por qué, quién, cómo, cuándo, dónde, cuánto (García, 2011).</li>
+                <li><strong>Torbellino de ideas</strong>: Genera ideas espontáneas con un moderador, ideal para iniciar discusiones.</li>
+                <li><strong>Mesa redonda</strong>: Rotación de preguntas para respuestas nuevas.</li>
+                <li><strong>Pensamiento visual</strong>: Mapas mentales, mandalas, circept, para representar información gráficamente.</li>
+                <li><strong>Aprendizaje colaborativo</strong>: Técnicas como tutoría entre pares, rompecabezas, y grupos de discusión.</li>
+            </ul>
+        </p>
+        <p class="text-lg mb-4">
+            <strong>Estilos de enseñanza</strong>: Los estilos docente (abierto, formal, estructurado, funcional) se alinean con estilos de aprendizaje estudiantil (activo, reflexivo, teórico, pragmático), optimizando la experiencia educativa. Además, un clima afectivo positivo fortalece el aprendizaje, ya que "lo que nunca olvidamos es la actitud y disposición de los demás" (Restrepo, 1994).
+        </p>
+        <div class="flex justify-between">
+            <button onclick="navigateTo('page2')" class="bg-white text-blue-900 px-4 py-2 rounded border hover:bg-gray-200">Volver</button>
+            <button onclick="navigateTo('page4')" class="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800">Siguiente</button>
+        </div>
+    </div>
+
+    <!-- Página 4: Evaluación y Retroalimentación -->
+    <div id="page4" class="page">
+        <h2 class="text-3xl font-bold mb-4 text-blue-900">Evaluación y Retroalimentación</h2>
+        <p class="text-lg mb-4">
+            La evaluación y la retroalimentación son pilares para mejorar la calidad del proceso educativo. La retroalimentación constante, tanto oral (sincrónica) como escrita (asincrónica), guía a los estudiantes hacia aprendizajes significativos y autónomos. Debe ser clara, precisa, y positiva, destacando aciertos y sugiriendo mejoras específicas, como "excelente uso de autores, pero fortalece la argumentación con más evidencia" (Blanco Felip, 2016).
+        </p>
+        <p class="text-lg mb-4">
+            <strong>Tipos de evaluación</strong>:
+            <ul class="list-disc pl-6">
+                <li><strong>Autoevaluación</strong>: Reflexión sobre el propio desempeño.</li>
+                <li><strong>Heteroevaluación</strong>: Evaluación por pares.</li>
+                <li><strong>Coevaluación</strong>: Mixta entre docente y estudiantes.</li>
+                <li><strong>Externa</strong>: Por entes externos (ej. SIMCE).</li>
+                <li><strong>Metaevaluación</strong>: Evaluación de la evaluación.</li>
+            </ul>
+        </p>
+        <p class="text-lg mb-4">
+            <strong>Momentos de evaluación</strong>:
+            <ul class="list-disc pl-6">
+                <li><strong>Inicial</strong>: Diagnóstico del desempeño inicial.</li>
+                <li><strong>Proceso</strong>: Seguimiento para ajustar la enseñanza.</li>
+                <li><strong>Final</strong>: Síntesis de resultados.</li>
+                <li><strong>Posterior</strong>: Verificación de aprendizajes retenidos.</li>
+            </ul>
+        </p>
+        <p class="text-lg mb-4">
+            <strong>Instrumentos de evaluación</strong>: Incluyen listas de cotejo, rúbricas, escalas de estimación, registros anecdóticos, y cuestionarios. Las listas de cotejo deben tener objetivos claros e indicadores breves. La actividad sumativa de la semana 8 requiere diseñar un instrumento para evaluar dos clases planificadas, abordando aspectos conceptuales, procedimentales, y actitudinales (Blanco Felip, 2016).
+        </p>
+        <div class="flex justify-between">
+            <button onclick="navigateTo('page3')" class="bg-white text-blue-900 px-4 py-2 rounded border hover:bg-gray-200">Volver</button>
+            <button onclick="navigateTo('page5')" class="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800">Siguiente</button>
+        </div>
+    </div>
+
+    <!-- Página 5: Preguntas Didácticas -->
+    <div id="page5" class="page">
+        <h2 class="text-3xl font-bold mb-4 text-blue-900">Evaluación Didáctica: Unidad 4</h2>
+        <p class="text-lg mb-4">Responde las siguientes preguntas para avanzar. Todas son obligatorias.</p>
+        <form id="quizForm" onsubmit="return validateForm(event)">
+            <!-- Verdadero/Falso -->
+            <div class="question-container">
+                <p class="font-bold">1. La retroalimentación constante fomenta aprendizajes autónomos. (Verdadero/Falso)</p>
+                <label><input type="radio" name="q1" value="true" required> Verdadero</label>
+                <label><input type="radio" name="q1" value="false"> Falso</label>
+            </div>
+            <div class="question-container">
+                <p class="font-bold">2. La programación didáctica no requiere considerar las necesidades individuales de los estudiantes. (Verdadero/Falso)</p>
+                <label><input type="radio" name="q2" value="true" required> Verdadero</label>
+                <label><input type="radio" name="q2" value="false"> Falso</label>
+            </div>
+            <div class="question-container">
+                <p class="font-bold">3. Un mapa conceptual organiza información de lo general a lo específico. (Verdadero/Falso)</p>
+                <label><input type="radio" name="q3" value="true" required> Verdadero</label>
+                <label><input type="radio" name="q3" value="false"> Falso</label>
+            </div>
+            <div class="question-container">
+                <p class="font-bold">4. La evaluación inicial no es necesaria en el proceso educativo. (Verdadero/Falso)</p>
+                <label><input type="radio" name="q4" value="true" required> Verdadero</label>
+                <label><input type="radio" name="q4" value="false"> Falso</label>
+            </div>
+            <div class="question-container">
+                <p class="font-bold">5. El aprendizaje basado en problemas (ABP) promueve el pensamiento crítico. (Verdadero/Falso)</p>
+                <label><input type="radio" name="q5" value="true" required> Verdadero</label>
+                <label><input type="radio" name="q5" value="false"> Falso</label>
+            </div>
+
+            <!-- Opción Múltiple -->
+            <div class="question-container">
+                <p class="font-bold">6. ¿Qué elemento es esencial en la programación didáctica?</p>
+                <select name="q6" required class="border p-2 w-full">
+                    <option value="">Selecciona una opción</option>
+                    <option value="a">Alineación de objetivos, contenidos y evaluaciones</option>
+                    <option value="b">Uso exclusivo de clases magistrales</option>
+                    <option value="c">Ignorar las necesidades de los estudiantes</option>
+                </select>
+            </div>
+            <div class="question-container">
+                <p class="font-bold">7. ¿Qué estrategia metodológica fomenta la participación grupal espontánea?</p>
+                <select name="q7" required class="border p-2 w-full">
+                    <option value="">Selecciona una opción</option>
+                    <option value="a">Torbellino de ideas</option>
+                    <option value="b">Clases expositivas</option>
+                    <option value="c">Evaluaciones escritas</option>
+                </select>
+            </div>
+            <div class="question-container">
+                <p class="font-bold">8. La retroalimentación efectiva debe ser:</p>
+                <select name="q8" required class="border p-2 w-full">
+                    <option value="">Selecciona una opción</option>
+                    <option value="a">Clara, precisa y positiva</option>
+                    <option value="b">Ambígua y general</option>
+                    <option value="c">Exclusivamente oral</option>
+                </select>
+            </div>
+            <div class="question-container">
+                <p class="font-bold">9. ¿Qué momento de evaluación permite ajustar la enseñanza durante el proceso?</p>
+                <select name="q9" required class="border p-2 w-full">
+                    <option value="">Selecciona una opción</option>
+                    <option value="a">Evaluación de proceso</option>
+                    <option value="b">Evaluación final</option>
+                    <option value="c">Evaluación externa</option>
+                </select>
+            </div>
+            <div class="question-container">
+                <p class="font-bold">10. ¿Qué instrumento de evaluación requiere indicadores breves y precisos?</p>
+                <select name="q10" required class="border p-2 w-full">
+                    <option value="">Selecciona una opción</option>
+                    <option value="a">Lista de cotejo</option>
+                    <option value="b">Ensayo narrativo</option>
+                    <option value="c">Conferencia</option>
+                </select>
+            </div>
+            <div class="question-container">
+                <p class="font-bold">11. ¿Qué estrategia didáctica fomenta el aprendizaje autónomo?</p>
+                <select name="q11" required class="border p-2 w-full">
+                    <option value="">Selecciona una opción</option>
+                    <option value="a">Aprendizaje basado en problemas</option>
+                    <option value="b">Clases magistrales</option>
+                    <option value="c">Memorización de textos</option>
+                </select>
+            </div>
+            <div class="question-container">
+                <p class="font-bold">12. ¿Qué estilo de enseñanza favorece al estudiante pragmático?</p>
+                <select name="q12" required class="border p-2 w-full">
+                    <option value="">Selecciona una opción</option>
+                    <option value="a">Funcional</option>
+                    <option value="b">Abierto</option>
+                    <option value="c">Formal</option>
+                </select>
+            </div>
+            <div class="question-container">
+                <p class="font-bold">13. Las preguntas guía abordan aspectos como:</p>
+                <select name="q13" required class="border p-2 w-full">
+                    <option value="">Selecciona una opción</option>
+                    <option value="a">Qué, para qué, por qué, quién</option>
+                    <option value="b">Solo conceptos teóricos</option>
+                    <option value="c">Solo evaluaciones finales</option>
+                </select>
+            </div>
+            <div class="question-container">
+                <p class="font-bold">14. ¿Qué fomenta el pensamiento visual en el aula?</p>
+                <select name="q14" required class="border p-2 w-full">
+                    <option value="">Selecciona una opción</option>
+                    <option value="a">Representaciones gráficas de información</option>
+                    <option value="b">Memorización de textos</option>
+                    <option value="c">Clases expositivas</option>
+                </select>
+            </div>
+            <div class="question-container">
+                <p class="font-bold">15. ¿Por qué es importante la retroalimentación emocional?</p>
+                <select name="q15" required class="border p-2 w-full">
+                    <option value="">Selecciona una opción</option>
+                    <option value="a">Motiva a los estudiantes y fortalece el aprendizaje</option>
+                    <option value="b">Solo califica el desempeño</option>
+                    <option value="c">No afecta el proceso educativo</option>
+                </select>
+            </div>
+            <div class="question-container">
+                <p class="font-bold">16. Escenario: Diseñas un curso de logística en Chile. ¿Qué estrategia usarías para fomentar la creatividad?</p>
+                <select name="q16" required class="border p-2 w-full">
+                    <option value="">Selecciona una opción</option>
+                    <option value="a">Torbellino de ideas</option>
+                    <option value="b">Exámenes escritos</option>
+                    <option value="c">Lecturas teóricas</option>
+                </select>
+            </div>
+            <div class="question-container">
+                <p class="font-bold">17. Caso práctico: Un estudiante tiene dificultades con un proyecto grupal. ¿Cómo lo apoyarías?</p>
+                <select name="q17" required class="border p-2 w-full">
+                    <option value="">Selecciona una opción</option>
+                    <option value="a">Ofrecer tutoría entre pares y retroalimentación clara</option>
+                    <option value="b">Asignar más tareas individuales</option>
+                    <option value="c">Ignorar las dificultades</option>
+                </select>
+            </div>
+            <div class="question-container">
+                <p class="font-bold">18. Juego de roles: Eres docente en una empresa minera. ¿Cómo justificarías la evaluación diferenciada?</p>
+                <select name="q18" required class="border p-2 w-full">
+                    <option value="">Selecciona una opción</option>
+                    <option value="a">Adapta la enseñanza a necesidades individuales</option>
+                    <option value="b">Aplica la misma evaluación a todos</option>
+                    <option value="c">Solo evalúa conocimientos teóricos</option>
+                </select>
+            </div>
+
+            <p id="error" class="error">Por favor, responde todas las preguntas.</p>
+            <button type="submit" class="bg-yellow-500 text-blue-900 px-4 py-2 rounded hover:bg-yellow-400">Enviar Respuestas</button>
+        </form>
+
+        <!-- Respuestas Correctas -->
+        <div id="answers" class="answer-section mt-8">
+            <h3 class="text-2xl font-bold mb-4 text-blue-900">Respuestas Correctas</h3>
+            <ol class="list-decimal pl-6">
+                <li><strong>Verdadero.</strong> La retroalimentación constante guía a los estudiantes hacia aprendizajes autónomos (Blanco Felip, 2016).</li>
+                <li><strong>Falso.</strong> La programación didáctica debe adaptarse a las necesidades individuales para ser efectiva (Ministerio de Educación de Chile, 2020).</li>
+                <li><strong>Verdadero.</strong> Los mapas conceptuales organizan información de lo general a lo específico.</li>
+                <li><strong>Falso.</strong> La evaluación inicial es crucial para diagnosticar el desempeño inicial (Blanco Felip, 2016).</li>
+                <li><strong>Verdadero.</strong> El ABP fomenta el pensamiento crítico y el aprendizaje autónomo (Benito & Cruz, 2005).</li>
+                <li><strong>a) Alineación de objetivos, contenidos y evaluaciones.</strong> Es esencial para una programación didáctica efectiva (Biggs, 2003).</li>
+                <li><strong>a) Torbellino de ideas.</strong> Promueve la participación grupal espontánea (García, 2011).</li>
+                <li><strong>a) Clara, precisa y positiva.</strong> La retroalimentación efectiva motiva y orienta (Blanco Felip, 2016).</li>
+                <li><strong>a) Evaluación de proceso.</strong> Permite ajustes durante el proceso educativo (Blanco Felip, 2016).</li>
+                <li><strong>a) Lista de cotejo.</strong> Requiere indicadores breves y precisos.</li>
+                <li><strong>a) Aprendizaje basado en problemas.</strong> Fomenta la autonomía y el pensamiento crítico (Benito & Cruz, 2005).</li>
+                <li><strong>a) Funcional.</strong> Favorece al estudiante pragmático al centrarse en resultados prácticos.</li>
+                <li><strong>a) Qué, para qué, por qué, quién.</strong> Las preguntas guía abordan estos aspectos (García, 2011).</li>
+                <li><strong>a) Representaciones gráficas de información.</strong> El pensamiento visual usa mapas mentales y diagramas.</li>
+                <li><strong>a) Motiva a los estudiantes y fortalece el aprendizaje.</strong> Un clima afectivo positivo es clave (Restrepo, 1994).</li>
+                <li><strong>a) Torbellino de ideas.</strong> Fomenta la creatividad en un contexto práctico como la logística (García, 2011).</li>
+                <li><strong>a) Ofrecer tutoría entre pares y retroalimentación clara.</strong> Apoya al estudiante y promueve colaboración.</li>
+                <li><strong>a) Adapta la enseñanza a necesidades individuales.</strong> La evaluación diferenciada asegura equidad (Blanco Felip, 2016).</li>
+            </ol>
+            <h3 class="text-2xl font-bold mt-6 mb-4 text-blue-900">Conclusión</h3>
+            <p class="text-lg mb-4">
+                La programación didáctica, las estrategias metodológicas, y la evaluación con retroalimentación son fundamentales para un aprendizaje activo y significativo. En contextos chilenos, estas prácticas deben adaptarse a la diversidad estudiantil, integrando metodologías como ABP, pensamiento visual, y evaluación diferenciada para empoderar a los estudiantes como aprendices autónomos y críticos (Blanco Felip, 2016; Benito & Cruz, 2005).
+            </p>
+            <p class="text-lg mb-4">
+                <strong>Bibliografía</strong>:
+                <ul class="list-disc pl-6">
+                    <li>Benito, A., & Cruz, A. (2005). <em>Nuevas claves para la docencia universitaria en el Espacio Europeo de Educación Superior</em>. Narcea.</li>
+                    <li>Biggs, J. (2003). <em>Teaching for quality learning at university</em>. Open University Press.</li>
+                    <li>Blanco Felip, L. A. (2016). <em>La evaluación educativa, más proceso que producto</em>. Edicions de la Universitat de Lleida.</li>
+                    <li>Doran, G. T. (1981). There’s a S.M.A.R.T. way to write management’s goals and objectives. <em>Management Review</em>, 70(11), 35-36.</li>
+                    <li>Fullan, M., Quinn, J., & McEachen, J. (2017). <em>Deep learning: Engage the world, change the world</em>. Corwin Press.</li>
+                    <li>García, J. (2011). <em>Estrategias de aprendizaje</em>. Ediciones Pirámide.</li>
+                    <li>Ministerio de Educación de Chile. (2020). <em>Bases curriculares</em>. https://www.mineduc.cl</li>
+                    <li>Restrepo, L. M. (1994). <em>Educación y afectividad</em>. Universidad de Antioquia.</li>
+                </ul>
+            </p>
+            <div class="flex justify-between">
+                <button onclick="navigateTo('page1')" class="bg-white text-blue-900 px-6 py-2 rounded border hover:bg-gray-200">Volver al Inicio</button>
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSdskZ5qH2OcvCYo-XZYNrmvSZKuvfh895UlOLnhE-EUKYge8w/viewform?usp=dialog" target="_blank" class="bg-yellow-500 text-blue-900 px-6 py-2 rounded hover:bg-yellow-400">Ir al Quiz</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function startPresentation() {
+            sessionStorage.setItem('hasSeenIntro', 'true');
+            document.getElementById('intro-message').classList.remove('active');
+            document.getElementById('page1').classList.add('active');
+        }
+
+        function navigateTo(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function validateForm(event) {
+            event.preventDefault();
+            const form = document.getElementById('quizForm');
+            const inputs = form.querySelectorAll('input, select');
+            let allSelected = true;
+
+            inputs.forEach(input => {
+                if (!input.value) {
+                    allSelected = false;
+                }
+            });
+
+            if (allSelected) {
+                document.getElementById('answers').style.display = 'block';
+                form.style.display = 'none';
+                window.scrollTo(0, document.getElementById('answers').offsetTop);
+            } else {
+                document.getElementById('error').style.display = 'block';
+            }
+
+            return false;
+        }
+
+        // Iniciar según si el mensaje inicial ya se vio
+        if (sessionStorage.getItem('hasSeenIntro') === 'true') {
+            document.getElementById('page1').classList.add('active');
+        } else {
+            document.getElementById('intro-message').classList.add('active');
+        }
+    </script>
+</body>
+</html>
